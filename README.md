@@ -1,1 +1,2 @@
 # Twuliva-001
+This is a project for my studying raspberry Pi 4, focused on OpenCV firstly, i don't know what's the meaning of the name, Selina gave me this name, i used it because it sounds good. Twuliva/托力亚
