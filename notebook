@@ -18,10 +18,15 @@ Install OpenCV
 . Install OpenCV: sudo apt install python3-opencv
 . try again and again if it failed because missing some package.
 
-Solve the problem of “Cannot currently show the dekstop”
+Solve the problem of "Cannot currently show the dekstop"
 . Log in Raspberry Pi4
 . sudo rasps-config
 . change the resolution to a lower value and connect VNC again.
 
 how to get the CPU temperature?
 cat /sys/class/thermal/thermal_zone0/temp
+
+how to add a user and change his group information?
+ sudo adduser XXX
+ sudo usermod -a -G GROUPNAME USERNAME
+ reboot it to take effect
