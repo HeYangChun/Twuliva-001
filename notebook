@@ -5,7 +5,7 @@ Raspberry pi 4
 . Start Raspberry pi
 . HDMI 0 will display desktop and begin to set up
 . run Raspberry Pi Configuration from raspberry menu in left-top
-. select Interface tab, and enable ssh and 
+. select Interface tab, and enable ssh and vnc 
 
 Install OpenCV
 . python3 and python2 are installed already
