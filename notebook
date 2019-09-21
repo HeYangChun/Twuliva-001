@@ -1,0 +1,26 @@
+Raspberry pi 4
+. Download OS image(with desktop) from official website
+. Formate SD card with SD Card formatter tool
+. Write OS image downloaded in step 1 with Win32DiskImager
+. Start Raspberry pi
+. HDMI 0 will display desktop and begin to set up
+. run Raspberry Pi Configuration from raspberry menu in left-top
+. select Interface tab, and enable ssh and 
+
+Install OpenCV
+. python3 and python2 are installed already
+. sudo apt-update
+. apt list python*opencv*, below list shows an OpenCV version for raspberry Pi4:
+	python-opencv-apps/stable 1.12.0-2 all
+	python-opencv/stable 3.2.0+dfsg-6 army
+	python3-opencv-apps/stable 1.12.0-2 all
+	python3-opencv/stable,now 3.2.0+dfsg-6 army
+. Install OpenCV: sudo apt install python3-opencv
+. try again and again if it failed because missing some package.
+
+Solve the problem of “Cannot currently show the dekstop”
+. Log in Raspberry Pi4
+. sudo rasps-config
+. change the resolution to a lower value and connect VNC again.
+
+
