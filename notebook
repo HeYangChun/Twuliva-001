@@ -23,4 +23,5 @@ Solve the problem of “Cannot currently show the dekstop”
 . sudo rasps-config
 . change the resolution to a lower value and connect VNC again.
 
-
+how to get the CPU temperature?
+cat /sys/class/thermal/thermal_zone0/temp
