@@ -30,3 +30,6 @@ how to add a user and change his group information?
  sudo adduser XXX
  sudo usermod -a -G GROUPNAME USERNAME
  reboot it to take effect
+
+how to use an existed conda python environment in pycharm?
+. select "Existing interpreter" for "Project interpreter",select the python which located in conda environment path, for example: /home/XXXX/anaconda3/bin/python 
