@@ -1,43 +1,29 @@
 import numpy as np
 import cv2 as cv
 
-#List events information
-# events = [i for i in dir(cv) if 'EVENT' in i]
-drawing = False
-mode = True
-ix, iy = -1, -1
+img = cv.imread('/home/andy/1.jpeg')
+#px is like this:[b,g,r]
+px = img[100,100]
+#access only blue
+blue = img[100,100,0]
+#modify pixel
+img[100,100] = [255,255,255]
+#array method item and itemset
+img.item(10,10,2)
+img.itemset((10,10,2),100)
+#image attribute
+img.shape
+img.size
+img.dtype
+#ROI Region of Intresting
+# anything = img[300:400,200:400]
+# img[0:100, 0:200] = anything
+#split color channel
+b,g,r = cv.split(img)
+img = cv.merge((r,g,b))
+#or
+b = img[:,:,0]
 
-#a Callback function
-def draw_circle(event, x, y, flags, param):
-    global ix, iy, drawing, mode
-
-    if event == cv.EVENT_LBUTTONDOWN:
-        drawing = True
-        ix, iy = x, y
-    elif event == cv.EVENT_MOUSEMOVE:
-        if drawing == True:
-            if mode == True:
-                cv.rectangle(img, (ix, iy), (x, y), (0, 255, 0), -1)
-            else:
-                cv.circle(img, (x, y), 20, (0, 0, 255), -1)
-    elif event == cv.EVENT_LBUTTONUP:
-        drawing = False
-        if mode == True:
-            cv.rectangle(img, (ix, iy), (x, y), (0, 255, 0), -1)
-        else:
-            cv.circle(img, (x, y), 20, (0, 0, 255), -1)
-    elif event == cv.EVENT_LBUTTONDBLCLK:
-        cv.circle(img, (x, y), 100, (0, 0, 255), -1)
-
-
-img = np.zeros((512, 512, 3), np.uint8)
-cv.namedWindow('image')
-cv.setMouseCallback('image', draw_circle)
-
-while True:
-    cv.imshow('image', img)
-    if cv.waitKey(20) & 0xFF == ord('q'):
-        break;
-    if cv.waitKey(20) & 0xFF == ord('m'):
-        mode = not mode
+cv.imshow("WINDOW TITLE",img)
+cv.waitKey(0)
 cv.destroyAllWindows()

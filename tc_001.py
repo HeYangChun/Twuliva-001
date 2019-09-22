@@ -119,3 +119,61 @@ while True:
     if cv.waitKey(20) & 0xFF == ord('m'):
         mode = not mode
 cv.destroyAllWindows()
+
+#############################################################################
+#Trackbar in CV
+def nothing(x):
+    pass
+
+img = np.zeros((300,512,3),np.uint8)
+cv.namedWindow('image')
+
+cv.createTrackbar('R','image',0,255,nothing)
+cv.createTrackbar('G','image',0,255,nothing)
+cv.createTrackbar('B','image',0,255,nothing)
+switch = '0 : OFF \n1 : ON'
+cv.createTrackbar(switch,'image',0,1,nothing)
+
+while(1):
+    cv.imshow('image',img)
+    k = cv.waitKey(1) & 0xFF
+    if k == ord('q'):
+        break
+    r = cv.getTrackbarPos('R','image')
+    g = cv.getTrackbarPos('G', 'image')
+    b = cv.getTrackbarPos('B', 'image')
+    s = cv.getTrackbarPos(switch,'image')
+    if s == 0:
+        img[:]=0
+    else:
+        img[:] = [b,g,r]
+
+cv.destroyAllWindows()
+
+#############################################################################
+img = cv.imread('/home/andy/1.jpeg')
+#px is like this:[b,g,r]
+px = img[100,100]
+#access only blue
+blue = img[100,100,0]
+#modify pixel
+img[100,100] = [255,255,255]
+#array method item and itemset
+img.item(10,10,2)
+img.itemset((10,10,2),100)
+#image attribute
+img.shape
+img.size
+img.dtype
+#ROI Region of Intresting
+# anything = img[300:400,200:400]
+# img[0:100, 0:200] = anything
+#split color channel
+b,g,r = cv.split(img)
+img = cv.merge((r,g,b))
+#or
+b = img[:,:,0]
+
+cv.imshow("WINDOW TITLE",img)
+cv.waitKey(0)
+cv.destroyAllWindows()
