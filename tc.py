@@ -1,24 +1,21 @@
 import numpy as np
 import cv2 as cv
 
-cap = cv.VideoCapture(0)
-if not cap.isOpened():
-    print("Cannot open camera")
-    exit()
+#saving a video
+img = np.zeros((512,512,3),np.uint8)
+#draw a blue BGR(255,0,0) line with thickness of 5 px
+cv.line(img,(0,0),(511,511),(255,0,0),5)
+cv.rectangle(img,(384,0),(510,128),(0,255,0),3)
+cv.circle(img,(63,63),63,(0,0,255),-1)
+cv.ellipse(img,(256,256),(100,50),0,0,180,255,-1)
 
-cap.set(cv.CAP_PROP_FRAME_WIDTH,1024)
-cap.set(cv.CAP_PROP_FRAME_HEIGHT,768)
+pts = np.array([[10,5],[20,30],[70,20],[50,10]],np.int32)
+pts = pts.reshape((-1,1,2))
+cv.polylines(img,[pts],True,(0,255,255))
 
-while True:
-    #capture frame-by-frame
-    ret,frame = cap.read()
-    if not ret:
-        print("Cannot receive frame,exiting")
-        break
-    gray = cv.cvtColor(frame,cv.COLOR_BGR2GRAY)
-    frame = cv.rotate(frame,cv.ROTATE_180)
-    cv.imshow("frame",frame)
-    if cv.waitKey(1) == ord('q'):
-        break;
-cap.release()
+font = cv.FONT_HERSHEY_SIMPLEX
+cv.putText(img,'HeYC',(10,500),font,4,(255,255,255),2,cv.LINE_4)
+
+cv.imshow("WINDOW TITLE",img)
+cv.waitKey(0)
 cv.destroyAllWindows()
