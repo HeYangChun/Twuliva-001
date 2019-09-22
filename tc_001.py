@@ -40,3 +40,50 @@ while True:
         break;
 cap.release()
 cv.destroyAllWindows()
+
+#saving a video
+cap = cv.VideoCapture(0)
+fourcc = cv.VideoWriter_fourcc(*'XVID')
+out = cv.VideoWriter('output.avi',fourcc,20.0,(640,480))
+while cap.isOpened():
+    ret,frame = cap.read()
+    if not ret:
+        print("Cannot receive frame, exiting")
+        break
+    # flipcode: >0: y axis; =0: x axis; <0: both
+    frame=cv.flip(frame,1)
+    # frame = cv.rotate(frame,cv.ROTATE_90_COUNTERCLOCKWISE)
+
+    out.write(frame)
+
+    cv.imshow('frame',frame)
+    if cv.waitKey(1) == ord('q'):
+        break;
+
+cap.release()
+out.release()
+cv.destroyAllWindows()
+
+
+#Draw something
+import numpy as np
+import cv2 as cv
+
+#saving a video
+img = np.zeros((512,512,3),np.uint8)
+#draw a blue BGR(255,0,0) line with thickness of 5 px
+cv.line(img,(0,0),(511,511),(255,0,0),5)
+cv.rectangle(img,(384,0),(510,128),(0,255,0),3)
+cv.circle(img,(63,63),63,(0,0,255),-1)
+cv.ellipse(img,(256,256),(100,50),0,0,180,255,-1)
+
+pts = np.array([[10,5],[20,30],[70,20],[50,10]],np.int32)
+pts = pts.reshape((-1,1,2))
+cv.polylines(img,[pts],True,(0,255,255))
+
+font = cv.FONT_HERSHEY_SIMPLEX
+cv.putText(img,'HeYC',(10,500),font,4,(255,255,255),2,cv.LINE_4)
+
+cv.imshow("WINDOW TITLE",img)
+cv.waitKey(0)
+cv.destroyAllWindows()
