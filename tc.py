@@ -1,21 +1,43 @@
 import numpy as np
 import cv2 as cv
 
-#saving a video
-img = np.zeros((512,512,3),np.uint8)
-#draw a blue BGR(255,0,0) line with thickness of 5 px
-cv.line(img,(0,0),(511,511),(255,0,0),5)
-cv.rectangle(img,(384,0),(510,128),(0,255,0),3)
-cv.circle(img,(63,63),63,(0,0,255),-1)
-cv.ellipse(img,(256,256),(100,50),0,0,180,255,-1)
+#List events information
+# events = [i for i in dir(cv) if 'EVENT' in i]
+drawing = False
+mode = True
+ix, iy = -1, -1
 
-pts = np.array([[10,5],[20,30],[70,20],[50,10]],np.int32)
-pts = pts.reshape((-1,1,2))
-cv.polylines(img,[pts],True,(0,255,255))
+#a Callback function
+def draw_circle(event, x, y, flags, param):
+    global ix, iy, drawing, mode
 
-font = cv.FONT_HERSHEY_SIMPLEX
-cv.putText(img,'HeYC',(10,500),font,4,(255,255,255),2,cv.LINE_4)
+    if event == cv.EVENT_LBUTTONDOWN:
+        drawing = True
+        ix, iy = x, y
+    elif event == cv.EVENT_MOUSEMOVE:
+        if drawing == True:
+            if mode == True:
+                cv.rectangle(img, (ix, iy), (x, y), (0, 255, 0), -1)
+            else:
+                cv.circle(img, (x, y), 20, (0, 0, 255), -1)
+    elif event == cv.EVENT_LBUTTONUP:
+        drawing = False
+        if mode == True:
+            cv.rectangle(img, (ix, iy), (x, y), (0, 255, 0), -1)
+        else:
+            cv.circle(img, (x, y), 20, (0, 0, 255), -1)
+    elif event == cv.EVENT_LBUTTONDBLCLK:
+        cv.circle(img, (x, y), 100, (0, 0, 255), -1)
 
-cv.imshow("WINDOW TITLE",img)
-cv.waitKey(0)
+
+img = np.zeros((512, 512, 3), np.uint8)
+cv.namedWindow('image')
+cv.setMouseCallback('image', draw_circle)
+
+while True:
+    cv.imshow('image', img)
+    if cv.waitKey(20) & 0xFF == ord('q'):
+        break;
+    if cv.waitKey(20) & 0xFF == ord('m'):
+        mode = not mode
 cv.destroyAllWindows()
