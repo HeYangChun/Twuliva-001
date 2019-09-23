@@ -177,3 +177,42 @@ b = img[:,:,0]
 cv.imshow("WINDOW TITLE",img)
 cv.waitKey(0)
 cv.destroyAllWindows()
+
+#############################################################################
+#Arithmetic Operations
+x = np.uint8([250])
+y = np.uint8([10])
+cv.add(x,y)  # [[255]]  250 + 10 = 260 > 255  -> 255
+x+y          # 4        250 + 10 = 260 & 0XFF
+
+#Image blending
+#dst = a * img1 + b * img2 + c
+img1 = cv.imread("/home/andy/1.jpeg")
+img2 = cv.imread("/home/andy/2.jpeg")
+#below operation runs ok only when img1 and img2 has the same shape
+dst = cv.addWeighted(img1, 0, img2, 1, 0)
+
+#Image Bitwise
+img2 = cv.imread("/home/andy/logo.png")
+#get row,col if the object pic
+rows, cols, channels = img2.shape
+#region of interesting
+roi = img1[0:rows,0:cols]
+#convert ot gray image and remove pixel by threshold value
+img2gray  = cv.cvtColor(img2,cv.COLOR_BGR2GRAY)
+ret, mask = cv.threshold(img2gray,10,255,cv.THRESH_BINARY)
+#mask of that pixel not needed
+mask_inv = cv.bitwise_not(mask)
+
+img1_bg = cv.bitwise_and(roi, roi, mask = mask_inv)
+#those pixels not neede are set to zero by bitwise and operation
+img2_fg = cv.bitwise_and(img2,img2,mask = mask)
+
+dst=cv.add(img1_bg,img2_fg)
+img1[0:rows,0:cols] = dst
+#scale the image
+img1 = cv.resize(img1,(0,0),fx=0.1,fy=0.1,interpolation=cv.INTER_NEAREST)
+
+cv.imshow('Dst', img1)
+cv.waitKey(0)
+cv.destroyAllWindows()
