@@ -343,6 +343,8 @@ dst = cv.warpAffine(res, M, (cols, rows))
 
 #
 rows, cols, ch = res.shape
+# what do below points mean? refer to:
+# https://jingyan.baidu.com/article/a17d5285c128cc8098c8f2f2.html(base) 
 pts1 = np.float32([[56, 65], [368, 52], [28, 387],[389,390]])
 pts2 = np.float32([[ 0,  0], [300,  0], [ 0, 300],[300,300]])
 M = cv.getPerspectiveTransform(pts1, pts2)
