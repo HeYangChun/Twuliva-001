@@ -351,8 +351,108 @@ M = cv.getPerspectiveTransform(pts1, pts2)
 dst = cv.warpPerspective(res, M, (300, 300))
 showImage('input',res)
 showImage('output',dst)
-
 #############################################################################
+#Threshold
+from matplotlib import pyplot as plt
+#Imgae threashold
 
+img = cv.imread('/home/andy/2.jpeg',0)
+# img = cv.medianBlur(img,5)
+ret, th1 = cv.threshold(img,80,255,cv.THRESH_BINARY)
+th2 = cv.adaptiveThreshold(img,255,cv.ADAPTIVE_THRESH_MEAN_C,    cv.THRESH_BINARY,25,2)
+# th3 = cv.adaptiveThreshold(img,255,cv.ADAPTIVE_THRESH_MEAN_C,    cv.THRESH_BINARY,15,2)
+th3 = cv.adaptiveThreshold(img,255,cv.ADAPTIVE_THRESH_GAUSSIAN_C,cv.THRESH_BINARY,25,2)
+titles = ['Org','Glb','ApaM','ApaG']
+imgs = [img, th1,th2,th3]
+for i in range(4):
+    plt.subplot(2,3,i+1),plt.imshow(imgs[i],'gray')
+    plt.title(titles[i])
+    plt.xticks([]),plt.yticks([])
 
+plt.show()
+exit()
+
+#if val > threshold-h val=high else val = valTBD
+# diffenec betwwen these effects
+img = cv.imread('/home/andy/gradient.jpg')
+ret, thresh1 = cv.threshold(img,72,96,cv.THRESH_BINARY)
+ret, thresh2 = cv.threshold(img,72,96,cv.THRESH_BINARY_INV)
+ret, thresh3 = cv.threshold(img,72,255,cv.THRESH_TRUNC)
+ret, thresh4 = cv.threshold(img,72,96,cv.THRESH_TOZERO)
+ret, thresh5 = cv.threshold(img,72,96,cv.THRESH_TOZERO_INV)
+
+titles = ['Org','Bin','IBin','Trc','TZero','ITZero']
+imgs = [img,thresh1,thresh2,thresh3,thresh4,thresh5]
+for i in range(6):
+    plt.subplot(2,3,i+1),plt.imshow(imgs[i],'gray')
+    plt.title(titles[i])
+    plt.xticks([]),plt.yticks([])
+
+plt.show()
 #############################################################################
+#OTSU!!!
+import matplotlib.pyplot as plt
+
+img =  cv.imread('/home/andy/noisey.png',0)#what does 0 means?
+#global threasholding
+ret1, th1 = cv.threshold(img,127,255,cv.THRESH_BINARY)
+#Otu's thresholding
+ret2, th2 = cv.threshold(img,  0,255,cv.THRESH_BINARY+cv.THRESH_OTSU)
+#Otu's thresholding after gaussioin filtering
+blur = cv. GaussianBlur(img,(5,5),0)
+ret2, th3 = cv.threshold(blur,  0,255,cv.THRESH_BINARY+cv.THRESH_OTSU)
+imgs = [img, 0, th1,
+        img, 0, th2,
+       blur, 0, th3]
+titles = ['orig','histogram','Global Thresholding(v=127)',
+          'orig','histogram','OTSUs Thresholding',
+          'blur','histogram','OTSUs Thresholding']
+for i in range(3):
+    plt.subplot(3,3,i*3+1), plt.imshow(imgs[i*3],'gray')
+    plt.title(titles[i*3]),plt.xticks([]),plt.yticks([])
+
+    plt.subplot(3,3,i*3+2),plt.hist(imgs[i*3].ravel(),256)
+    plt.title(titles[i*3+1]), plt.xticks([]), plt.yticks([])
+
+    plt.subplot(3, 3, i * 3 + 3), plt.imshow(imgs[i*3+2],'gray')
+    plt.title(titles[i*3+2]), plt.xticks([]), plt.yticks([])
+
+plt.show()
+#another example use OTSU
+img = cv.imread("/home/andy/1.jpeg", -1)
+img = cv.resize(img,(0,0),fx=0.1,fy=0.1,interpolation=cv.INTER_CUBIC)
+img = cv.GaussianBlur(img, (3,3),0)
+gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+
+retval, dst = cv.threshold(gray, 0, 255, cv.THRESH_OTSU)
+cv.imshow("src", img)
+cv.imshow("gray", gray)
+cv.imshow("dst", dst)
+cv.waitKey(0)
+#############################################################################
+#SMOOTH, LPF low pass filter  HPF high pass filter, LPF helps in removing noise
+#HPF helps in finding edges
+import matplotlib.pyplot as plt
+img = cv. imread("/home/andy/opencvlogo.png")
+#method1
+kernel = np.ones((7,7),np.float32)/(7)
+dst1 = cv.filter2D(img,-1,kernel)
+#method2
+dst2 = cv.blur(img,(5,5))
+#method3
+dst3 =  cv.GaussianBlur(img,(5,5),0)
+#method4
+dst4 = cv.medianBlur(img,5)
+#method5
+dst5 = cv.bilateralFilter(img,9,75,75)
+
+imgs = [img,dst1,dst2,dst3,dst4,dst5]
+titles =['org','Filter2D','blur','Gaussion','media','bilater']
+# plt.imshow(imgs[0])
+for x in range(6):
+    plt.subplot(2, 3, x+1), plt.imshow(imgs[x],'gray')
+    plt.title(titles[x])
+    plt.xticks([])
+    plt.yticks([])
+
+plt.show()

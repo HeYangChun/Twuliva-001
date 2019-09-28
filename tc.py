@@ -1,38 +1,32 @@
 import numpy as np
 import cv2 as cv
+#############################################################################
+#SMOOTH, LPF low pass filter  HPF high pass filter, LPF helps in removing noise
+#HPF helps in finding edges
+import matplotlib.pyplot as plt
+img = cv. imread("/home/andy/opencvlog2.png")
 
-from matplotlib import pyplot as plt
-#Imgae threashold
+#method1
+kernel = np.ones((7,7),np.float32)/(7)
+dst1 = cv.filter2D(img,-1,kernel)
+#method2
+dst2 = cv.blur(img,(5,5))
+#method3
+dst3 =  cv.GaussianBlur(img,(5,5),0)
+#method4
+dst4 = cv.medianBlur(img,5)
+#method5
+dst5 = cv.bilateralFilter(img,9,75,75)
 
-img = cv.imread('/home/andy/sudoku.png',0)
-# img = cv.medianBlur(img,5)
-ret, th1 = cv.threshold(img,127,255,cv.THRESH_BINARY)
-th2 = cv.adaptiveThreshold(img,255,cv.ADAPTIVE_THRESH_MEAN_C,    cv.THRESH_BINARY,11,2)
-th3 = cv.adaptiveThreshold(img,255,cv.ADAPTIVE_THRESH_GAUSSIAN_C,cv.THRESH_BINARY,11,2)
-titles = ['Org','Glb','ApaM','ApaG']
-imgs = [img, th1,th2,th3]
-for i in range(4):
-    plt.subplot(2,3,i+1),plt.imshow(imgs[i],'gray')
-    plt.title(titles[i])
-    plt.xticks([]),plt.yticks([])
-
-plt.show()
-exit()
-
-#if val > threshold-h val=high else val = valTBD
-# diffenec betwwen these effects
-img = cv.imread('/home/andy/gradient.jpg')
-ret, thresh1 = cv.threshold(img,72,96,cv.THRESH_BINARY)
-ret, thresh2 = cv.threshold(img,72,96,cv.THRESH_BINARY_INV)
-ret, thresh3 = cv.threshold(img,72,96,cv.THRESH_TRUNC)
-ret, thresh4 = cv.threshold(img,72,96,cv.THRESH_TOZERO)
-ret, thresh5 = cv.threshold(img,72,96,cv.THRESH_TOZERO_INV)
-
-titles = ['Org','Bin','IBin','Trc','TZero','ITZero']
-imgs = [img,thresh1,thresh2,thresh3,thresh4,thresh5]
-for i in range(6):
-    plt.subplot(2,3,i+1),plt.imshow(imgs[i],'gray')
-    plt.title(titles[i])
-    plt.xticks([]),plt.yticks([])
+imgs = [img,dst1,dst2,dst3,dst4,dst5]
+titles =['org','Filter2D','blur','Gaussion','media','bilater']
+# plt.imshow(imgs[0])
+for x in range(6):
+    plt.subplot(2, 3, x+1), plt.imshow(imgs[x],'gray')
+    plt.title(titles[x])
+    plt.xticks([])
+    plt.yticks([])
 
 plt.show()
+
+
