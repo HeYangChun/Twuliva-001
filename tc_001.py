@@ -456,3 +456,46 @@ for x in range(6):
     plt.yticks([])
 
 plt.show()
+#############################################################################
+#Morphological transform
+#物体形态处理，侵蚀　膨胀，梯度，黑帽，白帽,...
+img = cv .imread('/home/andy/j.png',0)
+kernel = np.ones((5,5),np.uint8)
+erosion  =  cv.erode(img,kernel,iterations = 1)
+dilation = cv.dilate(img,kernel,iterations = 1)
+opening  = cv.morphologyEx(img, cv.MORPH_OPEN, kernel)
+closing  = cv.morphologyEx(img, cv.MORPH_CLOSE, kernel)
+gradient = cv.morphologyEx(img, cv.MORPH_GRADIENT, kernel)
+tophat   = cv.morphologyEx(img, cv.MORPH_TOPHAT, kernel)
+blackhat = cv.morphologyEx(img, cv.MORPH_BLACKHAT, kernel)
+
+imgs = [img,erosion,dilation,opening,closing,gradient,tophat,blackhat]
+title = ["orig","erosion","dilation","opening","closing","gradient","tophat","blackhat"]
+for i in range(8):
+    plt.subplot(2,4,i+1)
+    plt.imshow(imgs[i])
+    plt.title(title[i])
+    plt.xticks([])
+    plt.yticks([])
+
+plt.show()
+#Technque cv.getStructuringElement(cv2.MORPH_RECT,(5,5))
+
+#############################################################################
+#Image gradient
+#Sobel 像素图像边缘检测　算子　索贝尔
+img = cv.imread('/home/andy/sudoku.png',0)
+laplacian = cv.Laplacian(img,cv.CV_64F)
+sobelx = cv.Sobel(img,cv.CV_64F,1,0, ksize=5)
+sobely = cv.Sobel(img,cv.CV_64F,0,1, ksize=5)
+
+imgs = [img,laplacian,sobelx,sobely]
+title = ["orig",'laplacian','sobelx','sobely']
+for i in range(4):
+    plt.subplot(2,2,i+1)
+    plt.imshow(imgs[i],cmap='gray')
+    plt.title(title[i])
+    plt.xticks([])
+    plt.yticks([])
+
+plt.show()
