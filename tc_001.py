@@ -499,3 +499,75 @@ for i in range(4):
     plt.yticks([])
 
 plt.show()
+#############################################################################
+#Canny edge detection is a popular edge detection algorithm
+#Noise reduction
+#Finding intensiy gradient of the Image
+#Non-maximum suppression
+#Hysteresis threshloding
+# 应用高斯滤波来平滑图像，目的是去除噪声
+# 找寻图像的强度梯度（intensity gradients）
+# 应用非最大抑制（non-maximum suppression）技术来消除边误检（本来不是但检测出来是）
+# 应用双阈值的方法来决定可能的（潜在的）边界
+# 利用滞后技术来跟踪边界
+img = cv.imread('/home/andy/cannytest1.png',0)
+edges = cv.Canny(img,0,255)
+
+imgs = [img,edges]
+title = ["orig",'edges']
+for i in range(2):
+    plt.subplot(1,2,i+1)
+    plt.imshow(imgs[i],cmap='gray')
+    plt.title(title[i])
+    plt.xticks([])
+    plt.yticks([])
+
+plt.show()
+#############################################################################
+#Image pyramids
+img = cv.imread('/home/andy/me.jpeg',0)
+lower_reso = cv.pyrDown(img)
+upper_reso = cv.pyrUp(lower_reso)
+# Image Blending using Pyramids
+A = cv.imread('/home/andy/apple1.png')
+B = cv.imread('/home/andy/orange1.png')
+G = A.copy()
+gpA = [G]
+for i in range(6):
+    G = cv.pyrDown(G)
+    gpA.append(G)
+
+G = B.copy()
+gpB = [G]
+for i in range(6):
+    G = cv.pyrDown(G)
+    gpB.append(G)
+
+lpA=[gpA[5]]
+for i in range(5,0,-1):
+    GE = cv.pyrUp(gpA[i])
+    L  = cv.subtract(gpA[i-1],GE)
+    lpA.append(L)
+
+lpB=[gpB[5]]
+for i in range(5,0,-1):
+    GE = cv.pyrUp(gpB[i])
+    L  = cv.subtract(gpB[i-1],GE)
+    lpB.append(L)
+
+LS =[]
+for la,lb in zip(lpA,lpB):
+    rows,cols,dpt = la.shape
+    half = int( cols/2)
+    ls = np.hstack((la[:,0:half],lb[:,half:]))
+    LS.append(ls)
+
+ls_ = LS[0]
+for i in range(1,6):
+    ls_ =cv.pyrUp(ls_)
+    ls_ = cv.add(ls_,LS[i])
+
+real = np.hstack((A[:,:half],B[:,half:]))
+
+cv.imwrite('/home/andy/pr_blending2.jpg',ls_)
+cv.imwrite('/home/andy/direct_blending2.jpg',real)

@@ -1,21 +1,51 @@
-import numpy as np
+import numpy as np, sys
 import cv2 as cv
 import matplotlib.pyplot as plt
 #############################################################################
-#Image gradient
-#Sobel 像素图像边缘检测　算子　索贝尔
-img = cv.imread('/home/andy/sudoku.png',0)
-laplacian = cv.Laplacian(img,cv.CV_64F)
-sobelx = cv.Sobel(img,cv.CV_64F,1,0, ksize=5)
-sobely = cv.Sobel(img,cv.CV_64F,0,1, ksize=5)
+#Image pyramids
+img = cv.imread('/home/andy/me.jpeg',0)
+lower_reso = cv.pyrDown(img)
+upper_reso = cv.pyrUp(lower_reso)
+# Image Blending using Pyramids
+A = cv.imread('/home/andy/apple1.png')
+B = cv.imread('/home/andy/orange1.png')
+G = A.copy()
+gpA = [G]
+for i in range(6):
+    G = cv.pyrDown(G)
+    gpA.append(G)
 
-imgs = [img,laplacian,sobelx,sobely]
-title = ["orig",'laplacian','sobelx','sobely']
-for i in range(4):
-    plt.subplot(2,2,i+1)
-    plt.imshow(imgs[i],cmap='gray')
-    plt.title(title[i])
-    plt.xticks([])
-    plt.yticks([])
+G = B.copy()
+gpB = [G]
+for i in range(6):
+    G = cv.pyrDown(G)
+    gpB.append(G)
 
-plt.show()
+lpA=[gpA[5]]
+for i in range(5,0,-1):
+    GE = cv.pyrUp(gpA[i])
+    L  = cv.subtract(gpA[i-1],GE)
+    lpA.append(L)
+
+lpB=[gpB[5]]
+for i in range(5,0,-1):
+    GE = cv.pyrUp(gpB[i])
+    L  = cv.subtract(gpB[i-1],GE)
+    lpB.append(L)
+
+LS =[]
+for la,lb in zip(lpA,lpB):
+    rows,cols,dpt = la.shape
+    half = int( cols/2)
+    ls = np.hstack((la[:,0:half],lb[:,half:]))
+    LS.append(ls)
+
+ls_ = LS[0]
+for i in range(1,6):
+    ls_ =cv.pyrUp(ls_)
+    ls_ = cv.add(ls_,LS[i])
+
+real = np.hstack((A[:,:half],B[:,half:]))
+
+cv.imwrite('/home/andy/pr_blending2.jpg',ls_)
+cv.imwrite('/home/andy/direct_blending2.jpg',real)
