@@ -2,39 +2,32 @@ import numpy as np, sys
 import cv2 as cv
 import matplotlib.pyplot as plt
 #############################################################################
-#Histogram
-# an overall idea about the intensity distribution of an imag
-img = cv .imread('/home/andy/apple1.png',0)
-hist, bin = np.histogramk(img.flatten(),256,[0,256])
-cdf = hist.cumsum()
-cdf_normalized = cdf * hist.max()/ cdf.max()
-plt.plot(cdf_normalized, color = 'b')
-plt.hist(img.flatten(),256,[0,256], color = 'r')
-plt.xlim([0,256])
-plt.legend(('cdf','histogram'), loc = 'upper left')
-plt.show()
+# histogram backprojection.
+#the output image will have our object of interest in more white compared to
+#two ways: using numpy , using cv
 
-cdf_m = np.ma.masked_equal(cdf,0)
-cdf_m = (cdf_m - cdf_m.min())*255/(cdf_m.max()-cdf_m.min())
-cdf = np.ma.filled(cdf_m,0).astype('uint8')
-img2 = cdf[img]
-plt.subplot(131),plt.imshow(img)
-plt.subplot(132),plt.imshow(img2)
-plt.subplot(133)
-plt.plot(cdf_m, color = 'b')
-plt.hist(img2.flatten(),256,[0,256], color = 'r')
-plt.xlim([0,256])
-plt.legend(('cdf','histogram'), loc = 'upper left')
-plt.show()
+roi = cv.imread('/home/andy/testroi.png')
+hsv = cv.cvtColor(roi,cv.COLOR_BGR2HSV)
 
-equ = cv.equalizeHist(img)
-res = np.hstack((img,equ))
-cv.imwrite('/home/andy/res.png',res)
-#CLAHE
-img = cv.imread('/home/andy/tsukuba_l.png',0)
-clahe = cv.createCLAHE(clipLimit=2.0,tileGridSize=(8,8))
-cl1 = clahe.apply(img)
-plt.subplot(121), plt.imshow(img,cmap='gray')
-plt.subplot(122), plt.imshow(cl1,cmap='gray')
-plt.show()
-cv.imwrite('/home/andy/tsu2.png',cl1)
+target = cv.imread('/home/andy/test.jpg')
+hsvt = cv.cvtColor(target,cv.COLOR_BGR2HSV)
+# calculating object histogram
+roihist = cv.calcHist([hsv],[0, 1], None, [128, 256], [0, 180, 0, 256] )
+# normalize histogram and apply backprojection
+cv.normalize(roihist,roihist,0,255,cv.NORM_MINMAX)
+
+dst = cv.calcBackProject([hsvt],[0,1],roihist,[0,180,0,256],1)
+
+# Now convolute with circular disc
+disc = cv.getStructuringElement(cv.MORPH_ELLIPSE,(5,5)) #
+
+cv.filter2D(dst,-1,disc,dst)
+# threshold and binary AND
+ret,thresh = cv.threshold(dst,50,255,0)
+thresh = cv.merge((thresh,thresh,thresh))
+res = cv.bitwise_and(target,thresh)
+res = np.hstack((target,thresh, res))
+cv.imshow('res',res)
+cv.waitKey(0)
+cv.destroyAllWindows()
+
