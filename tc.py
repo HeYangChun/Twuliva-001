@@ -2,32 +2,38 @@ import numpy as np, sys
 import cv2 as cv
 import matplotlib.pyplot as plt
 #############################################################################
-# histogram backprojection.
-#the output image will have our object of interest in more white compared to
-#two ways: using numpy , using cv
+# For images, 2D Discrete Fourier Transform (DFT) is used to find the
+# frequency domain. A fast algorithm called Fast Fourier Transform (FFT) is
+# used for calculation of DFT.
+# x(t)=Asin(2πft)
+# Numpy has an FFT package to do this. np.fft.fft2()
+img = cv.imread('/home/andy/me.jpeg',0)
+f = np.fft.fft2(img)
+fshift = np.fft.fftshift(f)
+magnitude_spectrum = 20*np.log(np.abs(fshift))
+magnitude_spectrum = magnitude_spectrum/256  #why this step is need to imshow
 
-roi = cv.imread('/home/andy/testroi.png')
-hsv = cv.cvtColor(roi,cv.COLOR_BGR2HSV)
+# plt.subplot(121), plt.imshow(img,               cmap='gray')
+# plt.subplot(122), plt.imshow(magnitude_spectrum,cmap='gray')
+# plt.show()
 
-target = cv.imread('/home/andy/test.jpg')
-hsvt = cv.cvtColor(target,cv.COLOR_BGR2HSV)
-# calculating object histogram
-roihist = cv.calcHist([hsv],[0, 1], None, [128, 256], [0, 180, 0, 256] )
-# normalize histogram and apply backprojection
-cv.normalize(roihist,roihist,0,255,cv.NORM_MINMAX)
+rows, cols = img.shape
+crow, ccol = int(rows/2), int(cols/2)
+xrang = 250
+fshift[crow-xrang:crow+xrang, ccol-xrang:ccol+xrang] = 0
+f_ishift = np.fft.ifftshift(fshift)
+img_back = np.fft.ifft2(f_ishift)
+img_back = np.abs(img_back)
+# plt.subplot(221), plt.imshow(img,cmap='gray'),      plt.xticks([]), plt.yticks([])
+# plt.subplot(222), plt.imshow(img_back,cmap='gray'), plt.xticks([]), plt.yticks([])
+# plt.subplot(223), plt.imshow(img_back),             plt.xticks([]), plt.yticks([])
+# plt.show()
 
-dst = cv.calcBackProject([hsvt],[0,1],roihist,[0,180,0,256],1)
-
-# Now convolute with circular disc
-disc = cv.getStructuringElement(cv.MORPH_ELLIPSE,(5,5)) #
-
-cv.filter2D(dst,-1,disc,dst)
-# threshold and binary AND
-ret,thresh = cv.threshold(dst,50,255,0)
-thresh = cv.merge((thresh,thresh,thresh))
-res = cv.bitwise_and(target,thresh)
-res = np.hstack((target,thresh, res))
-cv.imshow('res',res)
-cv.waitKey(0)
-cv.destroyAllWindows()
-
+#cv method
+# magnitude:震级；巨大；重大；重要性　spectrum:频谱；范围；领域；序列
+dft = cv.dft(np.float32(img),flags= cv.DFT_COMPLEX_OUTPUT)
+dft_shit = np.fft.fftshift(dft)
+magnitude_spectrum = 20 * np.log(cv.magnitude(dft_shit[:,:,0],dft_shit[:,:,1]))
+plt.subplot(121), plt.imshow(img,               cmap='gray')
+plt.subplot(122), plt.imshow(magnitude_spectrum,cmap='gray')
+plt.show()
