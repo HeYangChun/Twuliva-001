@@ -795,3 +795,95 @@ for i in range(6):
     plt.subplot(2,3,i+1), plt.imshow(mag_spectrum[i],cmap='gray')
     plt.title(filters_name[i]),plt.xticks([]),plt.yticks([])
 plt.show()
+#############################################################################
+#Template matching
+img = cv.imread('/home/andy/me.jpeg',0)
+img2 = img.copy()
+
+template = cv.imread('/home/andy/met.png',0)
+w,h = template.shape[::-1]
+
+# TM_CCORR：相关性匹配　　　　　TM_CCORR_NORMED:标准相关性匹配
+# TM_CCOEFF:相关性系数匹配   　TM_CCOEFF_NORMED：标准相关性系数匹配
+# TM_SQDIFF:平方差匹配 　　　　TM_SQDIFF_NORMED:标准平方差匹配
+methods = ['cv.TM_CCOEFF',        'cv.TM_CCOEFF_NORMED',  'cv.TM_CCORR',
+           'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF',         'cv.TM_SQDIFF_NORMED']
+
+for meth in methods:
+    img = img2.copy()
+    method = eval(meth)
+
+    res = cv.matchTemplate(img,template,method)
+    min_val,max_al,min_loc,max_loc = cv.minMaxLoc(res)
+    print(min_val)
+    print(max_al)
+    print(min_loc)
+    print(max_loc)
+
+    if method in [cv.TM_SQDIFF,cv.TM_SQDIFF_NORMED]:
+        top_left = min_loc
+    else:
+        top_left = max_loc
+    bottom_right = (top_left[0]+w, top_left[1]+h)
+
+    cv.rectangle(img, top_left,bottom_right,255,2)
+
+    # plt.subplot(221),plt.imshow(res,cmap='gray')
+    # plt.title('Matching result'), plt.xticks([]),plt.yticks([])
+    # plt.subplot(222),plt.imshow(img,cmap='gray')
+    # plt.title('detected point'), plt.xticks([]), plt.yticks([])
+    # plt.subplot(223), plt.imshow(template, cmap='gray')
+    # plt.title('template'), plt.xticks([]), plt.yticks([])
+    # plt.suptitle(meth)
+    # plt.show()
+# match more than one objects
+img_rgb = cv.imread('/home/andy/mario.jpeg')
+img_gray = cv.cvtColor(img_rgb,cv.COLOR_BGR2GRAY)
+template = cv.imread('/home/andy/mt.png')
+template = cv.cvtColor(template,cv.COLOR_BGR2GRAY)
+
+w,h = template.shape[::-1]
+res = cv.matchTemplate(img_gray,template,cv.TM_CCOEFF_NORMED)
+threshold =0.9
+loc = np.where(res >= threshold)
+for pt in zip(*loc[::-1]):
+    cv.rectangle(img_rgb,pt,(pt[0]+w,pt[1]+h),(0,255,0),1)
+
+plt.imshow(img_rgb)
+plt.show()
+
+#############################################################################
+# Hough Line Transform,Hough Transform is a popular technique to detect any
+# shape, if you can represent that shape in mathematical form. It can detect
+# the shape even if it is broken or distorted a little bit
+# . Any line can be represented in these two terms, (ρ,θ).
+img = cv.imread('/home/andy/sudoku.png')
+img2 = img.copy()
+
+gray = cv .cvtColor(img, cv.COLOR_BGR2GRAY)
+# Canny 边缘检测算法
+edges = cv.Canny(gray, 10, 150, apertureSize = 3, L2gradient=False)
+
+lines = cv.HoughLines(edges, 1, np.pi/360,200)
+for line in lines:
+    rho,theta = line[0]
+    a = np.cos(theta)
+    b = np.sin(theta)
+    x0 = a * rho
+    y0 = b * rho
+    x1 = int(x0 + 1000*(-b))
+    y1 = int(y0 + 1000 * (a))
+    x2 = int(x0 - 1000 * (-b))
+    y2 = int(y0 - 1000 * (a))
+
+    cv.line(img,(x1,y1),(x2,y2),(0,255,255),1)
+
+# edges = cv.Canny(gray,150,150,apertureSize = 3)
+# lines = cv.HoughLinesP(edges,1,np.pi/180,100,minLineLength=100,maxLineGap=10)
+# for line in lines:
+#     print(line[0])
+#     x1,y1,x2,y2 = line[0]
+#     cv.line(img,(x1,y1),(x2,y2),(0,255,0),1)
+plt.subplot(121), plt.imshow(edges), plt.xticks([]),plt.yticks([])
+plt.subplot(122), plt.imshow(img),  plt.xticks([]),plt.yticks([])
+plt.show()
