@@ -905,6 +905,7 @@ cv.waitKey(0)
 cv.destroyAllWindows()
 #############################################################################
 #Watershed 分水岭，重大变化的时间或周期
+# https://blog.csdn.net/dcrmg/article/details/52498440
 img = cv.imread('/home/andy/coin.jpg')
 gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
 ret, thresh = cv.threshold(gray,0,255,cv.THRESH_BINARY_INV + cv.THRESH_OTSU)
@@ -934,3 +935,16 @@ plt.subplot(222), plt.imshow(sure_bg),plt.xticks([]),plt.yticks([])
 plt.subplot(223), plt.imshow(sure_fg),plt.xticks([]),plt.yticks([])
 plt.subplot(224), plt.imshow(img),plt.xticks([]),plt.yticks([])
 plt.show()
+#############################################################################
+#GrabCut algorithm
+img = cv.imread('/home/andy/me.jpeg')
+plt.imshow(img),plt.colorbar(),plt.show()
+mask = np.zeros(img.shape[:2],np.uint8)
+bgdModel = np.zeros((1,65),np.float64)
+fgdModel = np.zeros((1,65),np.float64)
+rect = (180,0,1036,662)
+cv.grabCut(img,mask,rect,bgdModel,fgdModel,5,cv.GC_INIT_WITH_RECT)
+
+mask2 = np.where((mask==2)|(mask==0),0,1).astype('uint8')
+img = img*mask2[:,:,np.newaxis]
+plt.imshow(img),plt.colorbar(),plt.show()

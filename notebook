@@ -1,4 +1,23 @@
 
+.summary 20191009
+ Image processing in OpenCV
+ .Changing Colorspaces
+ .Geometric(几何的) Transformations of Images
+ .Image Thresholding(阈值)
+ .Smoothing Images
+ .Morphological(形态) Transformations
+ .Image Gradients(梯度)
+ .Canny Edge Detection
+ .Image Pyramids
+ .Contours(外形，轮廓，等高线) in OpenCV
+ .Histograms(直方图) in OpenCV
+ .Image Transforms in OpenCV
+ .Template Matching
+ .Hough Line Transform
+ .Hough Circle Transform
+ .Image Segmentation with Watershed(分水岭，转折点) Algorithm
+ .Interactive(互动的) Foreground Extraction using GrabCut(抓斗) Algorithm
+
 .反向投影
 　image=
   0  1  2  3
