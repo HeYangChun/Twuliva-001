@@ -2,7 +2,15 @@
 .summary 20191009
  Image processing in OpenCV
  .Changing Colorspaces
+    cv2.cvtColor(),
+    cv2.inRange() 判断一些点的颜色是否在某个范围内，返回一个0,1矩阵，可用作掩码。
+　　cv2.bitwise_* 对像素点进行位操作
+　　BGR 颜色空间与其他颜色空间的转化技巧：green = np.uint8([0,255,0]) hsvgreen=cv2.cvtColor(green,cv2.COLOR_BGR2HSV)
  .Geometric(几何的) Transformations of Images
+　　cv2.resize()改变图像的大小，用算法对图像缩放处理
+　　cv2.wrapAffine() 仿射变换。在向量空间中进行一次线性变换（乘以一个矩阵）加上一个平移。矩阵实例：M = np.float32([1,0,100],[0,1,50]), 合适的矩阵可以实现图像的旋转效果，cv2.getRotationMatrix2D((centerX,centerY),degree,scale)函数可以得到这样的一个矩阵。合适的矩阵可以实现图像的不规则变形（一组点的坐标变换到另一组新的位置），这个矩阵也可以用过cv2.getAffineTransform(oldPos,newPos)得到。
+　　cv2.warpPerspective() 透视变换。基于透视原理进行图像的变换，有点类似用上面的getAffineTransform得到的矩阵进行的放射变换。    
+
  .Image Thresholding(阈值)
  .Smoothing Images
  .Morphological(形态) Transformations
