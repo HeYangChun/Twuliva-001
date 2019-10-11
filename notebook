@@ -28,8 +28,13 @@
 　　ADAPTIVE_THRESH_MEAN_C：局部邻域块的均值，减去常数C
 　　ADAPTIVE_THRESH_GAUSSIAN_C：局部邻域块的高斯加权和，减去常数C
 
+ .Smoothing Images　图像平滑处理　
+    cv2.filter2D(img,-1,kernel), kernel 为一单通道浮点数矩阵，用于卷积计算。如何得到这个矩阵呢？
+　　cv2.blur(img,(5,5))，用均值模糊，(5,5)为内核大小为５Ｘ５
+　　cv2.GaussianBlur(img,(5,5),0)，高斯模糊
+　　cv2.medianBlur(img,5)　中值滤波模糊（消除椒盐噪声有奇效），5为模板大小，大于１的奇数
+　　cv2.bilateralFilter(img,9,75,75)双边滤波(边缘保存)
 
- .Smoothing Images
  .Morphological(形态) Transformations
  .Image Gradients(梯度)
  .Canny Edge Detection
