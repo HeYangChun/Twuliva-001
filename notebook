@@ -8,10 +8,27 @@
 　　BGR 颜色空间与其他颜色空间的转化技巧：green = np.uint8([0,255,0]) hsvgreen=cv2.cvtColor(green,cv2.COLOR_BGR2HSV)
  .Geometric(几何的) Transformations of Images
 　　cv2.resize()改变图像的大小，用算法对图像缩放处理
-　　cv2.wrapAffine() 仿射变换。在向量空间中进行一次线性变换（乘以一个矩阵）加上一个平移。矩阵实例：M = np.float32([1,0,100],[0,1,50]), 合适的矩阵可以实现图像的旋转效果，cv2.getRotationMatrix2D((centerX,centerY),degree,scale)函数可以得到这样的一个矩阵。合适的矩阵可以实现图像的不规则变形（一组点的坐标变换到另一组新的位置），这个矩阵也可以用过cv2.getAffineTransform(oldPos,newPos)得到。
-　　cv2.warpPerspective() 透视变换。基于透视原理进行图像的变换，有点类似用上面的getAffineTransform得到的矩阵进行的放射变换。    
+　　cv2.wrapAffine() 仿射变换。在向量空间中进行一次线性变换（乘以一个矩阵）加上一个平移。矩阵实例：M = np.float32([1,0,100],[0,1,50]), 合适的矩阵可以实现图像的旋转效果，cv2.getRotationMatrix2D((centerX,centerY),degree,scale)函数可以得到这样的一个矩阵。合适的矩阵可以实现图像的不规则变形（三个点的坐标变换到另一组新的位置），这个矩阵也可以用过cv2.getAffineTransform(oldPos,newPos)得到。
+　　cv2.warpPerspective() 透视变换。基于透视原理进行图像的变换（至少需要四个点的对应位置），有点类似用上面的getAffineTransform得到的矩阵进行的放射变换。
 
  .Image Thresholding(阈值)
+　　cv2.threshold(img,127,255,cv2.THRESH_BINARY)
+    区别：
+    THRESH_BINARY:当前点值大于阈值时，取Maxval,否则取０
+    THRESH_BINARY_INV: 当前点值大于阈值时，取０,否则取Maxval
+    THRESH_TRUNC:当前点值大于阈值时，设置为阈值，否则不改变
+    THRESH_TOZERO: 当前点值大于阈值时，不改变，否则设置为0
+    THRESH_TOZERO_INV: 当前点值大于阈值时，设置为0，否则不改变
+    THRESH_MASK:
+    THRESH_OTSU: 自适应阈值，可与其他选项或。
+    THRESH_TRIANGLE:用三角算法选取阈值，可与其他选项或，不用自己指定阈值。
+
+　　自适应的阈值算法
+　　cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY or THRESH_BINARY_INV,blockSize,c)
+　　ADAPTIVE_THRESH_MEAN_C：局部邻域块的均值，减去常数C
+　　ADAPTIVE_THRESH_GAUSSIAN_C：局部邻域块的高斯加权和，减去常数C
+
+
  .Smoothing Images
  .Morphological(形态) Transformations
  .Image Gradients(梯度)
