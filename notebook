@@ -35,14 +35,138 @@
 　　cv2.medianBlur(img,5)　中值滤波模糊（消除椒盐噪声有奇效），5为模板大小，大于１的奇数
 　　cv2.bilateralFilter(img,9,75,75)双边滤波(边缘保存)
 
- .Morphological(形态) Transformations
- .Image Gradients(梯度)
- .Canny Edge Detection
- .Image Pyramids
+ .Morphological(形态) Transformations，　变粗、变细，...
+   cv2.erode(img,kernel,iterations = 1)  侵蚀，腐蚀。kernel可以用getStructuringElement函数获取。
+   cv2.dilate(img,kernel,iterations = 1) 扩大，膨胀
+   cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)，先膨胀后侵蚀，可以消除外围噪点。
+   cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)，先侵蚀后膨胀，可消除物体上的噪声
+   cv2.morphologyEx(img, cv2.MORPH_GRADIENT, kernel),物体的空心轮廓线
+   cv2.morphologyEx(img, cv2.MORPH_TOPHAT, kernel),礼帽运算
+   cv2.morphologyEx(img, cv2.MORPH_BLACKHAT, kernel),黑帽运算
+   cv2.getStructuringElement(cv2.MORPH_RECT,(5,5))得到上述kernel的算法
+
+ .Image Gradients(梯度)，找到图像的坡度，边缘, 三种滤波器：High-pass filters(高通), Sobel(索贝尔), Scharr and Laplacian(沙尔和拉普拉斯)
+   laplacian = cv2.Laplacian(img,cv2.CV_64F) 拉普拉斯变换
+   sobelx = cv2.Sobel(img,cv2.CV_64F,1,0,ksize=5)　索贝尔变换X
+   sobely = cv2.Sobel(img,cv2.CV_64F,0,1,ksize=5)　索贝尔变换Y
+   需要注意上述的数据类型，如采用cv2.CV_8U则可能损失信息。
+   
+ .Canny Edge Detection　Canny边界检测算法:1986年开发的多级边缘检测：
+  .应用高斯滤波来平滑图像，目的是去除噪声
+  .找寻图像的强度梯度（intensity gradients）
+  .应用非最大抑制（non-maximum suppression）技术来消除边误检（本来不是但检测出来是）
+  .应用双阈值的方法来决定可能的（潜在的）边界
+  .利用滞后技术来跟踪边界
+  edges = cv2.Canny(img,100,200)，100,200为threshold1和threshold2,上述滞后处理中的两个阈值.
+
+ .Image Pyramids 金字塔,同一张图片的不同分辨率，案例：融合两张图片。
+   cv2.pyrDown(img)
+   cv2.pyrUp(img)
+
  .Contours(外形，轮廓，等高线) in OpenCV
+   找出轮廓线
+   im2, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)经过单色，阈值处理后.
+   画出轮廓线
+   cv2.drawContours(img, contours, -1, (0,255,0), 3)
+
  .Histograms(直方图) in OpenCV
- .Image Transforms in OpenCV
- .Template Matching
+   使用openCV计算单通道图像的直方图，了解每个像素点颜色的分布图
+   hist = cv2.calcHist([img],[0],None,[256],[0,256])
+   也可以使用NumPy的函数
+   hist,bins = np.histogram(img.ravel(),256,[0,256])
+   使用matplotlib绘制
+   plt.hist(img.ravel(),256,[0,256]); plt.show()
+   如果只想获取某一区域的直方图，使用一个该区域的Mask
+   mask = np.zeros(img.shape[:2], np.uint8)
+   mask[100:300, 100:400] = 255
+   masked_img = cv2.bitwise_and(img,img,mask = mask)
+   hist_mask = cv2.calcHist([img],[0],mask,[256],[0,256])
+   
+   直方图的均衡化，将原始的直方图拉伸，增强对比度，其思想是把原始图像的的灰度直方图从比较集中的某个区域变成在全部灰度范围内的均匀分布。旨在使得图像整体效果均匀，黑与白之间的各个像素级之间的点更均匀一点。
+   img = cv2.imread('wiki.jpg',0)
+   equ = cv2.equalizeHist(img)
+
+   CLAHE(Contrast Limited Adaptive Histgram Equalization)限制对比度自适应直方图均衡
+   clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+   cl1 = clahe.apply(img)
+
+   2D直方图，表示两个元素的相互影响
+   hist = cv2.calcHist([hsv], [0, 1], None, [180, 256], [0, 180, 0, 256])
+   参数：
+   [0,1]表示0和1通道
+   None表示没有mask
+   [180,256]表示0通道的bins为180，1通道的bins为256
+   [0,180,0,256]表示0通道的range为0到180，1通道的range为0到256
+
+   hist, xbins, ybins = np.histogram2d(h.ravel(),s.ravel(),[180,256],[[0,180],[0,256]])
+
+   直方图反向投影：首先计算某一特征的直方图模型，然后使用模型去寻找测试图像中存在的该特征。也就是根据样本的直方图，找到图像与样本相似的地方，多半在HSV色彩空间
+   https://blog.csdn.net/shuiyixin/article/details/80331839
+   幅图像的反向投影利用了其原始图像（或目标区域）的直方图，将该直方图作为一张查找表来找对应像素点的像素值，即将目标图像像素点的值设置为原始图像（或目标区域）直方图上对应的bin值。该bin值代表了（目标区域）上该像素值出现的概率。从而得到一幅图像的概率值。从而我们可以通过这幅概率图可以得知在这幅图像中，目标出现可能出现的位置。
+
+ .Image Transforms in OpenCV 图像变换（傅里叶变换）频域里的分析，高频信号和低频信号，边界和噪声是高频信号，图像主要部分是在低频分量
+   NumPy中的傅里叶变化：
+    f = np.fft.fft2(img)
+    #默认结果中心点位置在左上角，通过下面函数转移到中间
+    fshift = np.fft.fftshift(f)
+    #fshift是复数，求绝对值结果才是振幅
+    magnitude_spectrum = 20*np.log(np.abs(fshift))
+
+   逆变换，
+   f1shift = np.fft.ifftshift(fshift)
+   img_back = np.fft.ifft2(f1shift)
+   #出来的复数，无法显示，转成实数
+   img_back = np.abs(img_back)  #在频域里面做一些处理，再逆变回来，可以和原图比较差异
+   OpenCV中的傅里叶变换cv2.dft() cv2.idft()
+   dft = cv2.dft(np.float32(img),flags = cv2.DFT_COMPLEX_OUTPUT)
+   dft_shift = np.fft.fftshift(dft)
+
+   经过傅里叶变换，在频域里处理，再逆变回来的例子
+   rows, cols = img.shape
+   crow,ccol = rows/2 , cols/2
+   #Mask
+   mask = np.zeros((rows,cols,2),np.uint8)
+   mask[crow-30:crow+30, ccol-30:ccol+30] = 1
+   #频域里处理
+   fshift = dft_shift*mask
+   #逆变回来
+   f_ishift = np.fft.ifftshift(fshift)
+   #shift反操作
+   img_back = cv2.idft(f_ishift)
+   #图像复原 magnitude用来计算二维矢量的幅值
+   img_back = cv2.magnitude(img_back[:,:,0],img_back[:,:,1])
+
+   傅里叶变换的效率，cv2.getOptimalDFTSize() 可用来选取合适的尺寸
+   img = cv2.imread('messi5.jpg',0)
+   rows,cols = img.shape
+   nrows = cv2.getOptimalDFTSize(rows)
+   ncols = cv2.getOptimalDFTSize(cols)
+   nimg = np.zeros((nrows,ncols))
+   #拷贝原图像到新的这个Size中
+   nimg[:rows,:cols] = img
+   #下面的傅里叶变换效率大大提高近4倍
+   cv2.dft(np.float32(nimg),flags=cv2.DFT_COMPLEX_OUTPUT)
+
+  滤波器的运用
+
+ .Template Matching 模板匹配
+   cv2.matchTemplate(img,template,method),其中method可为：
+     cv2.TM_CCOEFF
+     cv2.TM_CCOEFF_NORMED
+     cv2.TM_CCORR
+     cv2.TM_CCORR_NORMED
+     cv2.TM_SQDIFF
+     cv2.TM_SQDIFF_NORMED
+   字符串转代码技巧:
+        meth='cv2.TM_COFF'
+        method = eval(meth)
+        cv2.matchTemplate(img,template,method)
+   如需匹配多个目标，需要在返回结果中根据指定一个阈值来获取:
+    res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED)
+    threshold = 0.8
+    loc = np.where( res >= threshold)
+    ...
+
  .Hough Line Transform
  .Hough Circle Transform
  .Image Segmentation with Watershed(分水岭，转折点) Algorithm
