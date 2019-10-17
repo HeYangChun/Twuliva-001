@@ -948,3 +948,114 @@ cv.grabCut(img,mask,rect,bgdModel,fgdModel,5,cv.GC_INIT_WITH_RECT)
 mask2 = np.where((mask==2)|(mask==0),0,1).astype('uint8')
 img = img*mask2[:,:,np.newaxis]
 plt.imshow(img),plt.colorbar(),plt.show()
+
+#############################################################################
+#Harris corner detection
+img = cv.imread('/home/andy/pics/chess.jpeg')
+gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+gray = np.float32(gray)
+dst = cv.cornerHarris(gray,2,3,0.04)
+#dilate 膨胀图像，参见变形处理
+dst = cv.dilate(dst,None)
+img[dst > 0.09 * dst.max() ] = [0,255,255]
+cv.imshow('dst',img)
+cv.waitKey(0)
+cv.destroyAllWindows()
+
+img = cv.imread('/home/andy/pics/sumiao.jpeg')
+gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+gray = np.float32(gray)
+dst = cv.cornerHarris(gray,2,3,0.04)
+#dilate 膨胀图像，参见变形处理
+dst = cv.dilate(dst,None)
+ret,dst = cv.threshold(dst,0.01*dst.max(),255,0)
+dst = np.uint8(dst)
+ret,labels,stats,centroids = cv.connectedComponentsWithStats(dst)
+criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER,100,0.001)
+corners = cv.cornerSubPix(gray,np.float32(centroids),(5,5),(-1,-1),criteria)
+res = np.hstack((centroids,corners))
+#最接近0的整数，12.9 -> 12  || -8.1  -> -8
+res = np.int0(res)
+img[res[:,1],res[:,0]]=[0,0,255]
+img[res[:,3],res[:,2]]=[0,255,0]
+cv.imwrite('/home/andy/pics/1015.png',img)
+
+#############################################################################
+#Shi-Tomasi Corner detector and good features to track
+img = cv.imread('/home/andy/pics/chess.jpeg')
+gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+corners =  cv.goodFeaturesToTrack(gray,20,0.01,10)
+corners = np.int0(corners)
+
+for i in corners:
+    x,y= i.ravel()
+    cv.circle(img,(x,y),4,255,-1)
+
+plt.imshow(img)
+plt.show()
+#############################################################################
+#SIFT (Scale-Invariant Feature Transform)尺度不变特征变换
+img = cv.imread('/home/andy/pics/1.jpeg')
+fast =  cv.FastFeatureDetector_create()
+kp = fast.detect(img,None)
+img2 =  cv.drawKeypoints(img,kp,None,color=(0,0,255))
+fast.setNonmaxSuppression(5) #镇压; 压制; 抑制;
+kp = fast.detect(img,None)
+img3 =  cv.drawKeypoints(img,kp,None,color=(0,255,0))
+
+plt.subplot(121), plt.imshow(img2)
+plt.subplot(122), plt.imshow(img3)
+plt.show()
+#############################################################################
+#Meanshift and Camshift
+cap = cv.VideoCapture(0)
+if not cap.isOpened():
+    print("Failed to open, exit")
+    exit()
+
+# cap.set(cv.CAP_PROP_FRAME_WIDTH, 512)
+# cap.set(cv.CAP_PROP_FRAME_HEIGHT, 384)
+
+ret, frame = cap.read()
+frame = cv.flip(frame, 1)
+
+# r,h,c,w = 0,115,245,139
+r,h,c,w = 245,139,0,115
+track_window = (c,r,w, h)
+
+roi = frame[r:r+h,c:c+w]
+# cv.imshow('roi',roi)
+# cv.waitKey(19000)
+# cv.destroyAllWindows()
+
+hsv_roi = cv.cvtColor(roi,cv.COLOR_BGR2HSV)
+mask = cv.inRange(hsv_roi,np.array((0.,60.,32.)),np.array((180.,255.,255.)))
+roi_hist = cv.calcHist([hsv_roi],[0],mask,[180],[0,180])
+cv.normalize(roi_hist,roi_hist,0,255,cv.NORM_MINMAX)
+
+term_crit = (cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_EPS,10,1)
+
+while (1):
+    ret, frame = cap.read()
+    if ret == True:
+        frame = cv.flip(frame, 1)
+        hsv = cv.cvtColor(frame,cv.COLOR_BGR2HSV)
+        dst = cv.calcBackProject([hsv],[0],roi_hist,[0,180],1)
+        ret, track_window = cv.meanShift(dst,track_window,term_crit)
+        ret, track_window = cv.CamShift(dst, track_window, term_crit)
+
+        x,y,w,h = track_window
+        img2 =  cv.rectangle(frame,(x,y),(x+w,y+h),255,2)
+        # cv.imshow('frame', img2)
+
+        pts = cv.boxPoints(ret)
+        pts = np.int0(pts)
+        img2 = cv.polylines(frame, [pts], True, 255, 2)
+        cv.imshow('img2', img2)
+
+        k=cv.waitKey(24) & 0xff
+        if k==27:
+            break;
+
+cv.destroyAllWindows()
+cap.release()
